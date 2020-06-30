@@ -1,0 +1,39 @@
+
+Vagrant.configure("2") do |config|
+
+  config.vm.define "mysql" do |db|
+
+    db.vm.box = "centos/8"
+    db.vm.hostname = "mariadb"
+    db.vm.network "private_network", ip: "172.19.42.20"
+    db.vm.provider "virtualbox" do |v|
+      v.name = "MYSQL"
+      v.memory = 1024
+      v.cpus = 2
+    end
+    db.vm.provision "shell", path: "mysql.sh"
+  end 
+ 
+  config.vm.define "ngihp" do |nginx| 
+    #the first 'nginx' string is what will vagrant name the vm when you will do vagrant gloval-status
+    # it can be  different from the vbox name
+
+    nginx.vm.box = "centos/8"
+    nginx.vm.hostname = "frontend"
+    nginx.vm.network "private_network", ip: "172.19.42.10"
+    nginx.vm.provider "virtualbox" do |v|
+      v.name = "nginx-php" #nom de la vm affiché sur vbox
+      v.memory = 512
+      v.cpus = 1
+    end 
+    nginx.vm.provision "shell", path: "nginx.sh"
+    nginx.vm.provision "shell", path: "php.sh"
+    #restart nginx after installing php
+    nginx.vm.provision  "shell", inline: "sudo systemctl restart nginx" 
+  end  
+  
+
+
+end
+#after deployement finished, check 172.19.42.10/index.html
+ #and 172.19.42.10/index.php
